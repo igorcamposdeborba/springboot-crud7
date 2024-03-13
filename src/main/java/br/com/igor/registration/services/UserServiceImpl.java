@@ -1,0 +1,136 @@
+package br.com.igor.registration.services;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import br.com.igor.registration.entities.User;
+import br.com.igor.registration.entities.dto.UserDTO;
+import br.com.igor.registration.exceptions.DataIntegrityViolationException;
+import br.com.igor.registration.exceptions.ObjectNotFoundException;
+import br.com.igor.registration.repositories.UserRespository;
+import jakarta.persistence.EntityNotFoundException;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+	@Autowired
+	private UserRespository userRespository;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;// criptografar senha
+	
+	@Override
+	@Transactional(readOnly = true) // ReadOnly true não trava o banco (boa prática em operações de leitura). Transação sempre executa esta operação no banco de dados se for 100% de sucesso. 
+	public UserDTO findById(Integer id) {
+		// Buscar no banco de dados
+		Optional<User> userDTO = userRespository.findById(id); 
+		
+		// Exception de validação
+		User entity = userDTO.orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+		
+		return new UserDTO(entity); // retornar somente dados permitidos (mapeados) pelo DTO
+	}
+	
+	@Override
+	@Transactional(readOnly = true) // ReadOnly true não trava o banco (boa prática em operações de leitura)
+	public Page<UserDTO> findAllPaged(Pageable pageable){
+		
+		// consultar banco de dados para User
+		Page<User> list = userRespository.findAll(pageable);
+		
+		// Converter User em DTO
+		List<UserDTO> listDTO = list.stream().map((User user) -> new UserDTO(user)).collect(Collectors.toList());
+		
+		// Converter DTO em Page
+		Page<UserDTO> page = new PageImpl<UserDTO>(listDTO);
+		
+		// retornar paginado o Page
+		return page;
+	}
+	
+	@Override
+	@Transactional
+	public UserDTO insert(UserDTO userDTO) {
+		// Exception para validar se já existe no banco de dados
+		validateDuplicatedEmail(userDTO.getEmail());
+		
+		// Mapear DTO para classe
+		User entity = new User(userDTO);
+		entity.setPassword(passwordEncoder.encode(userDTO.getPassword())); // criptografar senha que será salva no banco. Decriptografia pela biblioteca BCrypt neste service
+		
+		entity = userRespository.save(entity); // salvar no banco de dados
+		return new UserDTO(entity); // retornar o que foi salvo no banco de dados
+	}
+	
+	@Override
+	@Transactional
+	public UserDTO update(String idInput, UserDTO userDTO) {
+		try {
+			// Converter String para Integer id
+			Integer id = Integer.parseInt(idInput);
+			
+			// Busca lazy no banco de dados via endereço de memória, sem retornar toda a linha do banco
+			Optional<User> user = validateUpdateEmail(userDTO.getEmail());
+			
+			// Validar se o id passado é o mesmo que está no banco de dados para evitar que o usuário altere o id
+			if(user.get().getId().equals(id)) {
+				userDTO.setId(id);
+			}
+			
+			// Mapear DTO para classe
+			User entity = new User(userDTO);
+			
+			// Salvar no banco de dados
+			entity = userRespository.save(entity);
+			
+			// Retornar para a requisição o User atualizado
+			return new UserDTO(entity);
+			
+		} catch (EntityNotFoundException  e) {
+			throw new EntityNotFoundException ("Usuário não encontrado");
+		}
+	}
+	
+	@Transactional
+	public void deleteById(Integer id, UserDTO userDTO) {
+		
+		// Validar com exception se id não for encontrado
+		UserDTO userEntity = findById(id);
+		
+		if ( !Objects.equals(userEntity.getEmail(), userDTO.getEmail())) {
+			throw new IllegalArgumentException("O id informado não corresponde ao registrado no sistema");
+		}
+		
+		// Deletar no banco de dados
+		userRespository.deleteById(id);
+	}
+	
+	
+	private void validateDuplicatedEmail(String email) {
+		Optional<User> user = userRespository.findByEmail(email);
+		
+		if (user.isPresent()) {
+			throw new DataIntegrityViolationException("E-mail já presente no banco de dados");
+		}
+	}
+	
+	private Optional<User> validateUpdateEmail(String email) {
+		Optional<User> user = userRespository.findByEmail(email);
+		
+		if (user.isEmpty()) {
+			throw new IllegalArgumentException("O id informado não corresponde ao registrado no sistema");
+		}
+		
+		return user;
+	}
+}
