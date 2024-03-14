@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
+import br.com.igor.registration.exceptions.ObjectNotFoundException;
 import br.com.igor.registration.repositories.UserRespository;
 
 @SpringBootTest
@@ -65,6 +66,15 @@ public class UserServiceImplTest {
 	    		() -> Assertions.assertEquals(NAME, response.getName()),
 	    		() -> Assertions.assertEquals(EMAIL, response.getEmail()),
 	    		() -> Assertions.assertEquals(PASSWORD, response.getPassword()));
+	}
+	
+	@Test
+	void WhenFindByIdInvalidReturnAnObjectNotFoundException() {
+		
+		Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.findById(
+				Mockito.anyInt()),
+				"Usuário não encontrado");
+		
 	}
 	
 	@Test
