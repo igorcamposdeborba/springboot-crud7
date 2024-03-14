@@ -26,7 +26,7 @@ public class UserServiceImplTest {
 	private UserServiceImpl userService;
 	
 	@Mock // mockar respostas do repository
-	private UserRespository userRespository;
+	private UserRespository userRepository;
 	@Mock
 	private BCryptPasswordEncoder passwordEncoder;// criptografar senha
 	
@@ -35,7 +35,7 @@ public class UserServiceImplTest {
 	private Page<UserDTO> page;
 	private Optional<User> optionalUser;
 	
-	private static final Integer ID = 1;
+	private static final Integer ID = 3;
 	private static final String NAME = "Andressa",
 								EMAIL = "andressa@gmail.com",
 								PASSWORD = "123456";
@@ -56,7 +56,7 @@ public class UserServiceImplTest {
 	
 	@Test
 	void whenFindByIdThenReturnAnUser() {
-		Mockito.when(userRespository.findById(Mockito.anyInt())).thenReturn(optionalUser);
+		Mockito.when(userRepository.findById(Mockito.anyInt())).thenReturn(optionalUser);
 		
 		UserDTO response = userService.findById(ID);
 		
@@ -71,10 +71,13 @@ public class UserServiceImplTest {
 	@Test
 	void WhenFindByIdInvalidReturnAnObjectNotFoundException() {
 		
-		Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.findById(
-				Mockito.anyInt()),
-				"Usuário não encontrado");
+		Mockito.when(userRepository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Usuário não encontrado"));
 		
+		Assertions.assertThrows(
+		        ObjectNotFoundException.class,
+		        () -> userService.findById(Mockito.anyInt()),
+		        "Usuário não encontrados"
+		    );
 	}
 	
 	@Test
@@ -106,6 +109,4 @@ public class UserServiceImplTest {
 	void validateUpdateEmail() {
 		
 	}
-	
-	
 }
