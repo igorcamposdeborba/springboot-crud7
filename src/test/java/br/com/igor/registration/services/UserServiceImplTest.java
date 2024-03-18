@@ -95,6 +95,7 @@ public class UserServiceImplTest {
 		Assertions.assertNotNull(response);
 		Assertions.assertEquals(1, response.getSize());
 		Assertions.assertEquals(userDTO, response.getContent().get(0));
+		Assertions.assertEquals(userDTO.getEmail(), response.getContent().get(0).getEmail());
 	}
 	
 	@Test
