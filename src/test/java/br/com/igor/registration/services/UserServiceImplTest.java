@@ -1,5 +1,6 @@
 package br.com.igor.registration.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.catalina.startup.ClassLoaderFactory.Repository;
@@ -13,11 +14,13 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.exceptions.ObjectNotFoundException;
 import br.com.igor.registration.repositories.UserRespository;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 public class UserServiceImplTest {
@@ -73,16 +76,25 @@ public class UserServiceImplTest {
 		
 		Mockito.when(userRepository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Usuário não encontrado"));
 		
-		Assertions.assertThrows(
-		        ObjectNotFoundException.class,
-		        () -> userService.findById(Mockito.anyInt()),
-		        "Usuário não encontrados"
-		    );
+		try {
+			userService.findById(Mockito.anyInt());
+
+		} catch(ObjectNotFoundException e) {
+			Assertions.assertEquals(ObjectNotFoundException.class, e.getClass());
+			Assertions.assertEquals("Usuário não encontrado", e.getMessage());
+		}
 	}
 	
 	@Test
-	void findAllPaged() {
+	void whenFindAllPagedUsersThenReturnAllUsers() {
+		Mockito.when(userRepository.findAll(Mockito.any(Pageable.class))).thenReturn(new PageImpl<>(List.of(user)));
 		
+		Pageable page = Mockito.mock(Pageable.class);
+		Page<UserDTO> response = userService.findAllPaged(page);
+		
+		Assertions.assertNotNull(response);
+		Assertions.assertEquals(1, response.getSize());
+		Assertions.assertEquals(userDTO, response.getContent().get(0));
 	}
 	
 	@Test
