@@ -2,6 +2,8 @@ package br.com.igor.registration.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.catalina.startup.ClassLoaderFactory.Repository;
 import org.junit.jupiter.api.Assertions;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
+import br.com.igor.registration.exceptions.DataIntegrityViolationException;
 import br.com.igor.registration.exceptions.ObjectNotFoundException;
 import br.com.igor.registration.repositories.UserRespository;
 import org.springframework.data.domain.Pageable;
@@ -114,6 +117,18 @@ public class UserServiceImplTest {
 		Assertions.assertEquals(user.getName(), response.getName());
 		Assertions.assertEquals(user.getEmail(), response.getEmail());
 		Assertions.assertEquals(PASSWORD, response.getPassword());
+	}
+	
+	@Test
+	void whenInsertDuplicatedUserThenThrowsDataIntegrityViolationException() {
+		User userDuplicated = new User(2, NAME, EMAIL, PASSWORD);
+		Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(userDuplicated));
+		
+		try {
+			userService.insert(new UserDTO(userDuplicated));
+		} catch (DataIntegrityViolationException e) {
+			Assertions.assertEquals("E-mail já presente no banco de dados", e.getMessage());
+		}
 	}
 	
 	@Test
