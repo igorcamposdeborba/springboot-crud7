@@ -96,7 +96,10 @@ public class UserServiceImplTest {
 		Assertions.assertEquals(UserDTO.class, response.getContent().get(0).getClass());
 		Assertions.assertEquals(1, response.getSize());
 		Assertions.assertEquals(userDTO, response.getContent().get(0));
-		Assertions.assertEquals(userDTO.getEmail(), response.getContent().get(0).getEmail());
+		Assertions.assertEquals(EMAIL, response.getContent().get(0).getEmail());
+		Assertions.assertEquals(NAME, response.getContent().get(0).getName());
+		Assertions.assertEquals(PASSWORD, response.getContent().get(0).getPassword());
+		Assertions.assertEquals(ID, response.getContent().get(0).getId());
 	}
 	
 	@Test
