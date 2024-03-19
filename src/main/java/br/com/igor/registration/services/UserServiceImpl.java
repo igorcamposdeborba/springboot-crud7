@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 			Integer id = Integer.parseInt(idInput);
 			
 			// Busca lazy no banco de dados via endereço de memória, sem retornar toda a linha do banco
-			Optional<User> user = validateUpdateEmail(userDTO.getEmail());
+			Optional<User> user = validateUpdateEmail(userDTO.getEmail(), id);
 			
 			// Validar se o id passado é o mesmo que está no banco de dados para evitar que o usuário altere o id
 			if(user.get().getId().equals(id)) {
@@ -130,10 +130,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 	
-	private Optional<User> validateUpdateEmail(String email) {
+	private Optional<User> validateUpdateEmail(String email, Integer id) {
 		Optional<User> user = userRespository.findByEmail(email);
 		
-		if (user.isEmpty()) {
+		if (user.isEmpty() || ! Objects.equals(user.get().getId(), id)) {
 			throw new IllegalArgumentException("O id informado não corresponde ao registrado no sistema");
 		}
 		

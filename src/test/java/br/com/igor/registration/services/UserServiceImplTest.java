@@ -148,6 +148,20 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
+	void WhenUpdateUserWrongIdThenChangeThrowsIllegalArgumentException() {
+		Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(user));
+		
+		String wrongId = "1";
+		
+		try {
+			userService.update(wrongId, userDTO);
+		
+		} catch (IllegalArgumentException e) {
+			Assertions.assertEquals("O id informado não corresponde ao registrado no sistema", e.getMessage());
+		}
+	}
+	
+	@Test
 	void deleteById() {
 		
 	}
