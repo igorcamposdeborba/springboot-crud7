@@ -93,6 +93,7 @@ public class UserServiceImplTest {
 		Page<UserDTO> response = userService.findAllPaged(page);
 		
 		Assertions.assertNotNull(response);
+		Assertions.assertEquals(UserDTO.class, response.getContent().get(0).getClass());
 		Assertions.assertEquals(1, response.getSize());
 		Assertions.assertEquals(userDTO, response.getContent().get(0));
 		Assertions.assertEquals(userDTO.getEmail(), response.getContent().get(0).getEmail());
