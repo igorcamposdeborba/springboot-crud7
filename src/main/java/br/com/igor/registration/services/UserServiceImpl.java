@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 			User entity = new User(userDTO);
 			
 			// Salvar no banco de dados
-			entity = userRespository.save(entity);
+			userRespository.save(entity);
 			
 			// Retornar para a requisição o User atualizado
 			return new UserDTO(entity);

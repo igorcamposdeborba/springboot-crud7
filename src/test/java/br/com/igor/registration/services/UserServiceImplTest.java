@@ -126,14 +126,25 @@ public class UserServiceImplTest {
 		
 		try {
 			userService.insert(new UserDTO(userDuplicated));
+			
 		} catch (DataIntegrityViolationException e) {
 			Assertions.assertEquals("E-mail já presente no banco de dados", e.getMessage());
 		}
 	}
 	
 	@Test
-	void update() {
+	void WhenUpdateUserThenChangeDatabase() {
+		Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(user));
 		
+		UserDTO response = userService.update(ID.toString(), userDTO);
+		
+		Assertions.assertNotNull(response);
+		Assertions.assertEquals(UserDTO.class, response.getClass());
+		Assertions.assertEquals(userDTO, response);
+		Assertions.assertEquals(ID, response.getId());
+		Assertions.assertEquals(NAME, response.getName());
+		Assertions.assertEquals(EMAIL, response.getEmail());
+		Assertions.assertEquals(PASSWORD, response.getPassword());
 	}
 	
 	@Test
