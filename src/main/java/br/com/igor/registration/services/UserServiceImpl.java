@@ -1,4 +1,5 @@
 package br.com.igor.registration.services;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,7 +64,15 @@ public class UserServiceImpl implements UserService {
 		
 		// Mapear DTO para classe
 		User entity = new User(userDTO);
-		entity.setPassword(passwordEncoder.encode(userDTO.getPassword())); // criptografar senha que será salva no banco. Decriptografia pela biblioteca BCrypt neste service
+		
+		// Criptografar senha
+		String encoded = passwordEncoder.encode(userDTO.getPassword()); // criptografar senha que será salva no banco. Decriptografia pela biblioteca BCrypt neste service
+
+		if (Objects.isNull(encoded)) { // gerar senha aleatória se não vier a senha. Usuário deverá usar serviço de recuperar senha
+			SecureRandom randomPassword = new SecureRandom();
+			encoded = randomPassword.generateSeed(1000).toString();
+		}
+		entity.setPassword(encoded);
 		
 		entity = userRespository.save(entity); // salvar no banco de dados
 		return new UserDTO(entity); // retornar o que foi salvo no banco de dados

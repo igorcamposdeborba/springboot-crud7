@@ -41,6 +41,11 @@ public class User implements Serializable {
 		this.id = userDTO.getId();
 		this.name = userDTO.getName();
 		this.email = userDTO.getEmail();
+		this.password = userDTO.getPassword();
+	}
+	
+	public Integer getId() {
+		return id;
 	}
 
 	public String getName() {
@@ -64,15 +69,11 @@ public class User implements Serializable {
 	}
 
 	public void setPassword(String password) throws IllegalArgumentException {
-		if (password.length() < 6) {
+		if (Objects.isNull(password) || password.length() < 6) {
 			throw new IllegalArgumentException("Digite uma senha a partir de 6 caracteres");
 		}
 		if (Objects.nonNull(this.password) || this.password != ""){
 			this.password = password;
 		}
-	}
-
-	public Integer getId() {
-		return id;
 	}
 }

@@ -103,8 +103,17 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void insert() {
+	void whenInsertUserThenReturn201Created() {
+		Mockito.when(userRepository.save(Mockito.any())).thenReturn(user);
 		
+		UserDTO response = userService.insert(userDTO);
+		
+		Assertions.assertNotNull(response);
+		Assertions.assertEquals(UserDTO.class, response.getClass());
+		Assertions.assertEquals(user.getId(), response.getId());
+		Assertions.assertEquals(user.getName(), response.getName());
+		Assertions.assertEquals(user.getEmail(), response.getEmail());
+		Assertions.assertEquals(PASSWORD, response.getPassword());
 	}
 	
 	@Test
