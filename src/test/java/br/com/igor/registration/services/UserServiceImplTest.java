@@ -162,17 +162,26 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void deleteById() {
+	void deleteByIdWithSuccess() {
+		Mockito.when(userRepository.findById(Mockito.anyInt())).thenReturn(optionalUser);
+		Mockito.doNothing().when(userRepository).deleteById(Mockito.anyInt());
 		
+		userService.deleteById(ID, userDTO);
+		
+		Mockito.verify(userRepository, Mockito.times(1)).deleteById(ID);
 	}
+	// O id informado não corresponde ao registrado no sistema
 	
 	@Test
-	void validateDuplicatedEmail() {
+	void deleteByIdWrongIdThenThrowsObjectNotFoundException() {
+		Mockito.when(userRepository.findById(Mockito.anyInt()))
+			.thenThrow(new ObjectNotFoundException("O id informado não corresponde ao registrado no sistema"));
 		
-	}
-	
-	@Test
-	void validateUpdateEmail() {
+		try {
+		userService.deleteById(1, userDTO);
 		
+		} catch (ObjectNotFoundException e) {
+			Assertions.assertEquals("O id informado não corresponde ao registrado no sistema", e.getMessage());
+		}
 	}
 }
