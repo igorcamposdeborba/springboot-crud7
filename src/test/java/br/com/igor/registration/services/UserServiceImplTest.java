@@ -72,10 +72,10 @@ public class UserServiceImplTest {
 	@Test
 	void WhenFindByIdInvalidReturnAnObjectNotFoundException() {
 		
-		Mockito.when(userRepository.findById(Mockito.anyInt())).thenThrow(new ObjectNotFoundException("Usuário não encontrado"));
+		Mockito.when(userRepository.findById(1)).thenThrow(new ObjectNotFoundException("Usuário não encontrado"));
 		
 		try {
-			userService.findById(Mockito.anyInt());
+			userService.findById(66);
 
 		} catch(ObjectNotFoundException e) {
 			Assertions.assertEquals(ObjectNotFoundException.class, e.getClass());
