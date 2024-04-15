@@ -78,6 +78,7 @@ public class UserControllerTest {
 		ResponseEntity<Page<UserDTO>> userDTOResult = userController.findAll(PageRequest.of(0, 20));
 		
 		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult),
+							 () -> Assertions.assertTrue(this.page.getSize() > 0),
 							 () -> Assertions.assertEquals(this.page.get().getClass(), userDTOResult.getBody().get().getClass()),
 							 () -> Assertions.assertEquals(this.page, userDTOResult.getBody()));
 		
