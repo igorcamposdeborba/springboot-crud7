@@ -70,7 +70,7 @@ public class UserControllerTest {
 		Assertions.assertEquals(this.userDTOExpected.getPassword(), userDTOResult.getBody().getPassword());
 	}
 	
-	//  ResponseEntity<Page<UserDTO>> findAll(Pageable pageable)
+
 	@Test
 	void findAllUsersPageableThenReturnUserList() {  
 		Mockito.when(userService.findAllPaged(Mockito.any())).thenReturn(page);
