@@ -56,8 +56,9 @@ public class UserControllerTest {
 		Mockito.when(userService.findById(Mockito.anyInt())).thenReturn(userDTOExpected);
 		ResponseEntity<UserDTO> userDTOResult = userController.findById(ID);
 		
-		Assertions.assertEquals(this.userDTOExpected.getClass(), userDTOResult.getBody().getClass());
-		Assertions.assertEquals(this.userDTOExpected, userDTOResult.getBody());
+		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult),
+							 () -> Assertions.assertEquals(this.userDTOExpected.getClass(), userDTOResult.getBody().getClass()),
+							 () -> Assertions.assertEquals(this.userDTOExpected, userDTOResult.getBody()));
 		Assertions.assertEquals(this.userDTOExpected.getId(), userDTOResult.getBody().getId());
 		Assertions.assertEquals(this.userDTOExpected.getEmail(), userDTOResult.getBody().getEmail());
 		Assertions.assertEquals(this.userDTOExpected.getName(), userDTOResult.getBody().getName());
