@@ -73,9 +73,9 @@ public class UserControllerTest {
 
 	@Test
 	void findAllUsersPageableThenReturnUserList() {  
-		Mockito.when(userService.findAllPaged(Mockito.any())).thenReturn(page);
+		Mockito.when(userService.findAllPaged(Mockito.any())).thenReturn(page); // mockar páginas do service
 		
-		ResponseEntity<Page<UserDTO>> userDTOResult = userController.findAll(PageRequest.of(0, 20));
+		ResponseEntity<Page<UserDTO>> userDTOResult = userController.findAll(PageRequest.of(0, 20)); // buscar páginas do controller
 		
 		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult),
 							 () -> Assertions.assertTrue(this.page.getSize() > 0),
