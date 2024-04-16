@@ -16,13 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.repositories.UserRespository;
 import br.com.igor.registration.services.UserServiceImpl;
-import jakarta.validation.Valid;
 
 @SpringBootTest
 public class UserControllerTest {
