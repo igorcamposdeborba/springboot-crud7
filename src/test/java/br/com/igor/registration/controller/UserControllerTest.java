@@ -123,7 +123,8 @@ class UserControllerTest {
 	    
 	    userController.delete(ID, userDTOExpected);
 	    
-	    Mockito.verify(userController).delete(Mockito.eq(ID), Mockito.any(UserDTO.class));
+        Mockito.verify(userService).deleteById(Mockito.eq(ID), Mockito.any(UserDTO.class));
+	    
 	}
 	
 }
