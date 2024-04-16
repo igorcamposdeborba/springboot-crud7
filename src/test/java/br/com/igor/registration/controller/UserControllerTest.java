@@ -13,12 +13,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.repositories.UserRespository;
 import br.com.igor.registration.services.UserServiceImpl;
+import jakarta.validation.Valid;
 
 @SpringBootTest
 public class UserControllerTest {
@@ -56,7 +60,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
-	void findByIdUserPageableThenReturnUser() {  
+	void whenFindByIdUserPageableThenReturnUser() {  
 		Mockito.when(userService.findById(ID)).thenReturn(userDTOExpected);
 		
 		ResponseEntity<UserDTO> userDTOResult = userController.findById(ID);
@@ -72,7 +76,7 @@ public class UserControllerTest {
 	
 
 	@Test
-	void findAllUsersPageableThenReturnUserList() {  
+	void whenFindAllUsersPageableThenReturnUserList() {  
 		Mockito.when(userService.findAllPaged(Mockito.any())).thenReturn(page); // mockar páginas do service
 		
 		ResponseEntity<Page<UserDTO>> userDTOResult = userController.findAll(PageRequest.of(0, 20)); // buscar páginas do controller
@@ -88,5 +92,15 @@ public class UserControllerTest {
 		Assertions.assertEquals(this.page.get().findFirst().get().getPassword(), userDTOResult.getBody().get().findFirst().get().getPassword());
 	}
 	
+	@Test
+	void whenInsertUserThenReturn201Created() {
+	    Mockito.when(userService.insert(Mockito.any(UserDTO.class))).thenReturn(userDTOExpected);
+
+	    ResponseEntity<UserDTO> userDTOResult = userController.insert(userDTOExpected);
+		
+		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult));
+		
+	    Assertions.assertEquals(HttpStatus.CREATED, userDTOResult.getStatusCode());
+	}
 	
 }
