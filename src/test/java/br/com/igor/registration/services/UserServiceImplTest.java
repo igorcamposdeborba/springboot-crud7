@@ -147,13 +147,9 @@ public class UserServiceImplTest {
 		Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(user));
 		
 		String wrongId = "1";
-		
-		try {
-			userService.update(wrongId, userDTO);
-		
-		} catch (IllegalArgumentException e) {
-			Assertions.assertEquals("O id informado não corresponde ao registrado no sistema", e.getMessage());
-		}
+
+		Assertions.assertThrows(IllegalArgumentException.class, () -> userService.update(wrongId, userDTO), 
+				"Review parameters and class's processing because should throw a Exception");
 	}
 	
 	@Test
@@ -168,10 +164,19 @@ public class UserServiceImplTest {
 	
 	@Test
 	void deleteByIdWrongIdThenThrowsObjectNotFoundException() {
-		Mockito.when(userRepository.findById(Mockito.anyInt()))
+		Mockito.when(userRepository.findById(2))
 			.thenThrow(new ObjectNotFoundException("O id informado não corresponde ao registrado no sistema"));
 		
 		Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.deleteById(1, userDTO), 
+				"Review parameters and class's processing because should throw a Exception");
+	}
+	
+	@Test
+	void deleteByIdWrongEmailThenThrowsIllegalArgumentException() {
+		Mockito.when(userRepository.findById(Mockito.anyInt()))
+        .thenReturn(Optional.of(new User(1, "Test", "test@test.com", "1234567")));
+		
+		Assertions.assertThrows(IllegalArgumentException.class, () -> userService.deleteById(2, userDTO), 
 				"Review parameters and class's processing because should throw a Exception");
 	}
 }
