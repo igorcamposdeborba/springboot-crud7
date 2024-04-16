@@ -1,6 +1,7 @@
 package br.com.igor.registration.controller;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.repositories.UserRespository;
 import br.com.igor.registration.services.UserServiceImpl;
-import jakarta.validation.Valid;
 
 @SpringBootTest
 class UserControllerTest {
@@ -32,13 +29,13 @@ class UserControllerTest {
 	private UserController userController;
 	
 	@Mock
-	private UserRespository userRespository;
+	private UserRespository userRepository;
 	@Mock
 	private UserServiceImpl userService;
 	@Mock
 	private BCryptPasswordEncoder passwordEncoder;
 	
-	private static final Integer ID = 4;
+	private static final Integer ID = 3;
 	private static final String NAME = "Andressa",
 								EMAIL = "andressa@gmail.com",
 								PASSWORD = "123456";
@@ -118,6 +115,15 @@ class UserControllerTest {
 		Assertions.assertEquals(this.userDTOExpected.getEmail(), userDTOResult.getBody().getEmail());
 		Assertions.assertEquals(this.userDTOExpected.getName(), userDTOResult.getBody().getName());
 		Assertions.assertEquals(this.userDTOExpected.getPassword(), userDTOResult.getBody().getPassword());
+	}
+	
+	@Test
+	void deleteByIdWithSuccess() {
+	    Mockito.doNothing().when(userService).deleteById(Mockito.eq(ID), Mockito.any(UserDTO.class));
+	    
+	    userController.delete(ID, userDTOExpected);
+	    
+	    Mockito.verify(userController).delete(Mockito.eq(ID), Mockito.any(UserDTO.class));
 	}
 	
 }
