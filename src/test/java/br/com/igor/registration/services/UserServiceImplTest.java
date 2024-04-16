@@ -165,18 +165,13 @@ public class UserServiceImplTest {
 		
 		Mockito.verify(userRepository, Mockito.times(1)).deleteById(ID);
 	}
-	// O id informado não corresponde ao registrado no sistema
 	
 	@Test
 	void deleteByIdWrongIdThenThrowsObjectNotFoundException() {
 		Mockito.when(userRepository.findById(Mockito.anyInt()))
 			.thenThrow(new ObjectNotFoundException("O id informado não corresponde ao registrado no sistema"));
 		
-		try {
-		userService.deleteById(1, userDTO);
-		
-		} catch (ObjectNotFoundException e) {
-			Assertions.assertEquals("O id informado não corresponde ao registrado no sistema", e.getMessage());
-		}
+		Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.deleteById(1, userDTO), 
+				"Review parameters and class's processing because should throw a Exception");
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,12 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.exceptions.DataIntegrityViolationException;
 import br.com.igor.registration.exceptions.ObjectNotFoundException;
 import br.com.igor.registration.repositories.UserRespository;
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -81,30 +82,25 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public UserDTO update(String idInput, UserDTO userDTO) {
-		try {
-			// Converter String para Integer id
-			Integer id = Integer.parseInt(idInput);
-			
-			// Busca lazy no banco de dados via endereço de memória, sem retornar toda a linha do banco
-			Optional<User> user = validateUpdateEmail(userDTO.getEmail(), id);
-			
-			// Validar se o id passado é o mesmo que está no banco de dados para evitar que o usuário altere o id
-			if(user.get().getId().equals(id)) {
-				userDTO.setId(id);
-			}
-			
-			// Mapear DTO para classe
-			User entity = new User(userDTO);
-			
-			// Salvar no banco de dados
-			userRespository.save(entity);
-			
-			// Retornar para a requisição o User atualizado
-			return new UserDTO(entity);
-			
-		} catch (EntityNotFoundException  e) {
-			throw new EntityNotFoundException ("Usuário não encontrado");
+		// Converter String para Integer id
+		Integer id = Integer.parseInt(idInput);
+
+		// Busca lazy no banco de dados via endereço de memória, sem retornar toda a linha do banco
+		Optional<User> user = validateUpdateEmail(userDTO.getEmail(), id);
+
+		// Validar se o id passado é o mesmo que está no banco de dados para evitar que o usuário altere o id
+		if (user.get().getId().equals(id)) {
+			userDTO.setId(id);
 		}
+
+		// Mapear DTO para classe
+		User entity = new User(userDTO);
+
+		// Salvar no banco de dados
+		userRespository.save(entity);
+
+		// Retornar para a requisição o User atualizado
+		return new UserDTO(entity);
 	}
 	
 	@Transactional
