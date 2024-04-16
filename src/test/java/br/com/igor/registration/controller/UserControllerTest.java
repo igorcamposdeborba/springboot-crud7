@@ -16,13 +16,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import br.com.igor.registration.entities.User;
 import br.com.igor.registration.entities.dto.UserDTO;
 import br.com.igor.registration.repositories.UserRespository;
 import br.com.igor.registration.services.UserServiceImpl;
+import jakarta.validation.Valid;
 
 @SpringBootTest
-public class UserControllerTest {
+class UserControllerTest {
 	
 	@InjectMocks
 	private UserController userController;
@@ -98,6 +102,22 @@ public class UserControllerTest {
 		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult));
 		
 	    Assertions.assertEquals(HttpStatus.CREATED, userDTOResult.getStatusCode());
+	}
+	
+	@Test
+	void whenUpdateUserThenChangeDatabase() {
+	    Mockito.when(userService.update(Mockito.anyString(), Mockito.any(UserDTO.class))).thenReturn(userDTOExpected);
+
+	    ResponseEntity<UserDTO> userDTOResult = userController.update(String.valueOf(ID), userDTOExpected);
+		
+		Assertions.assertAll(() -> Assertions.assertNotNull(userDTOResult),
+							 () -> Assertions.assertEquals(this.userDTOExpected.getClass(), userDTOResult.getBody().getClass()),
+							 () -> Assertions.assertEquals(this.userDTOExpected, userDTOResult.getBody()));
+		
+		Assertions.assertEquals(this.userDTOExpected.getId(), userDTOResult.getBody().getId());
+		Assertions.assertEquals(this.userDTOExpected.getEmail(), userDTOResult.getBody().getEmail());
+		Assertions.assertEquals(this.userDTOExpected.getName(), userDTOResult.getBody().getName());
+		Assertions.assertEquals(this.userDTOExpected.getPassword(), userDTOResult.getBody().getPassword());
 	}
 	
 }

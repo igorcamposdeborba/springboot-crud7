@@ -70,7 +70,7 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void WhenFindByIdInvalidReturnAnObjectNotFoundException() {
+	void whenFindByIdInvalidReturnAnObjectNotFoundException() {
 		
 		Mockito.when(userRepository.findById(1)).thenThrow(new ObjectNotFoundException("Usuário não encontrado"));
 		
@@ -128,7 +128,7 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void WhenUpdateUserThenChangeDatabase() {
+	void whenUpdateUserThenChangeDatabase() {
 		Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(user));
 		
 		UserDTO response = userService.update(ID.toString(), userDTO);
