@@ -33,4 +33,32 @@ public class ResourceExceptionHandlerTest {
 		Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		Assertions.assertEquals("Usuário não encontrado", response.getBody().getError());
 	}
+	
+	@Test
+	void whenDataIntegrityViolationExceptionThenReturnAResponseEntity() {
+		ResponseEntity<StandardError> response = controllerExceptionHandler.dataIntegrityViolationException(
+				new DataIntegrityViolationException("E-mail já presente no banco de dados"), new MockHttpServletRequest());
+	
+		Assertions.assertNotNull(response);
+		Assertions.assertNotNull(response.getBody());
+		Assertions.assertEquals(ResponseEntity.class, response.getClass());
+		Assertions.assertEquals(StandardError.class, response.getBody().getClass());
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		Assertions.assertEquals("E-mail já presente no banco de dados", response.getBody().getError());
+	}
+	
+	@Test
+	void whenIllegalArgumentExceptionThenReturnAResponseEntity() {
+		ResponseEntity<StandardError> response = controllerExceptionHandler.illegalArgumentException(
+				new IllegalArgumentException("O id informado não corresponde ao registrado no sistema"), new MockHttpServletRequest());
+	
+		Assertions.assertNotNull(response);
+		Assertions.assertNotNull(response.getBody());
+		Assertions.assertEquals(ResponseEntity.class, response.getClass());
+		Assertions.assertEquals(StandardError.class, response.getBody().getClass());
+		Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		Assertions.assertEquals("O id informado não corresponde ao registrado no sistema", response.getBody().getError());
+	}
+	
+	
 }

@@ -33,11 +33,4 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new StandardError(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), exception.getMessage(), request.getRequestURI()));
 	}
-	
-	@ExceptionHandler(EmptyResultDataAccessException.class)
-	public ResponseEntity<StandardError> emptyResultDataAccessException(EmptyResultDataAccessException exception, HttpServletRequest request){
-		
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new StandardError(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), exception.getMessage(), request.getRequestURI()));
-	}
 }
