@@ -121,9 +121,12 @@ class UserControllerTest {
 	void deleteByIdWithSuccess() {
 	    Mockito.doNothing().when(userService).deleteById(Mockito.eq(ID), Mockito.any(UserDTO.class));
 	    
-	    userController.delete(ID, userDTOExpected);
+	    ResponseEntity<Void> response = userController.delete(ID, userDTOExpected);
 	    
         Mockito.verify(userService).deleteById(Mockito.eq(ID), Mockito.any(UserDTO.class));
+        Mockito.verify(userService, Mockito.times(1)).deleteById(ID, userDTOExpected);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        
 	    
 	}
 	
