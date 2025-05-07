@@ -1,11 +1,15 @@
 package br.com.igor.registration.controller;
 
 import java.net.URI;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import br.com.igor.registration.config.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.CacheControl;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,8 +38,11 @@ public class UserController {
 	@GetMapping(value = ID)
 	public ResponseEntity<UserDTO> findById(@PathVariable Integer id){
 		UserDTO userDTO = userService.findById(id);
-		
-		return ResponseEntity.ok().body(userDTO);
+
+		// Cache por 1 dia: informação para o front tratar dado no navegador do usuário e armazenar apenas por 1 dia
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(600, TimeUnit.SECONDS)
+															.mustRevalidate())
+								  .body(userDTO); // mustRevalidate obriga front-end verificar se o cache ainda é válido quando expirar o maxAge
 	}
 
 	@GetMapping (value = {"/", ""}) // aceitar com ou sem barra / a requisição
@@ -44,7 +51,8 @@ public class UserController {
 		Page <UserDTO> page = userService.findAllPaged(pageable);
 		
 		// Retornar resposta paginada
-		return ResponseEntity.ok().body(page);
+		return ResponseEntity.ok().headers(header -> header.add(Constants.CACHE_CONTROL.getValue(), "max-age=600"))
+				                  .body(page);
 	}
 	
 	@PostMapping
@@ -69,6 +77,6 @@ public class UserController {
 	public ResponseEntity<Void> delete(@Valid @PathVariable Integer id, @RequestBody UserDTO userDTO){
 		userService.deleteById(id, userDTO);
 		
-		return ResponseEntity.noContent().build(); // retornar status created 201 com uri do objeto criado
-	}
+		return ResponseEntity.noContent().cacheControl(CacheControl.noCache()).build(); // retornar status created 201 com uri do objeto criado
+	}	// no cache: para não armazenar o cache no front-end e fazer com que sempre consulte esse dado, mas ele armazena a informação de no-cache no lado do cliente (front end).
 }
