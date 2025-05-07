@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.CacheControl;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,9 +40,12 @@ public class UserController {
 	public ResponseEntity<UserDTO> findById(@PathVariable Integer id){
 		UserDTO userDTO = userService.findById(id);
 
+		String eTag = generateDeepETag(userDTO); // e-tag para detectar atributos que mudaram entre diferentes objetos (e entities) ou no mesmo objeto
+
 		// Cache por 1 dia: informação para o front tratar dado no navegador do usuário e armazenar apenas por 1 dia
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(600, TimeUnit.SECONDS)
 															.mustRevalidate())
+								  .eTag(eTag)
 								  .body(userDTO); // mustRevalidate obriga front-end verificar se o cache ainda é válido quando expirar o maxAge
 	}
 
@@ -49,10 +53,18 @@ public class UserController {
 	public ResponseEntity<Page<UserDTO>> findAll(Pageable pageable){
 		// Buscar paginação no service
 		Page <UserDTO> page = userService.findAllPaged(pageable);
-		
+
 		// Retornar resposta paginada
 		return ResponseEntity.ok().headers(header -> header.add(Constants.CACHE_CONTROL.getValue(), "max-age=600"))
 				                  .body(page);
+	}
+
+
+	private String generateDeepETag(UserDTO user){
+		String email = user.getEmail();
+		String password = user.getPassword();
+
+		return DigestUtils.md5DigestAsHex((email + password).getBytes());
 	}
 	
 	@PostMapping
