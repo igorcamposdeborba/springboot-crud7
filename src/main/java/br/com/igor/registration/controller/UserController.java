@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import br.com.igor.registration.config.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.CacheControl;
@@ -31,12 +32,16 @@ import jakarta.validation.Valid;
 public class UserController {
 
 	private static final String ID = "/{id}";
-	
-	@Autowired 
-	UserService userService;
+
+	private UserService userService;
+
+	public UserController(UserService userService){
+		this.userService = userService;
+	}
 	
 	
 	@GetMapping(value = ID)
+	@Cacheable(value = "findUserById")
 	public ResponseEntity<UserDTO> findById(@PathVariable Integer id){
 		UserDTO userDTO = userService.findById(id);
 
@@ -50,12 +55,13 @@ public class UserController {
 	}
 
 	@GetMapping (value = {"/", ""}) // aceitar com ou sem barra / a requisição
+	@Cacheable(value = "findAllUsers") // habilita cache no lado do servidor
 	public ResponseEntity<Page<UserDTO>> findAll(Pageable pageable){
 		// Buscar paginação no service
 		Page <UserDTO> page = userService.findAllPaged(pageable);
 
 		// Retornar resposta paginada
-		return ResponseEntity.ok().headers(header -> header.add(Constants.CACHE_CONTROL.getValue(), "max-age=600"))
+		return ResponseEntity.ok().headers(header -> header.add(Constants.CACHE_CONTROL.getValue(), "max-age=600")) // informando o front-end para armazenar cache
 				                  .body(page);
 	}
 
@@ -66,8 +72,9 @@ public class UserController {
 
 		return DigestUtils.md5DigestAsHex((email + password).getBytes());
 	}
-	
+
 	@PostMapping
+	@Cacheable(value = "insertUser")
 	public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserDTO userDTO){
 		// Inserir pelo service no banco de dados
 		UserDTO newUser = userService.insert(userDTO);
@@ -78,6 +85,7 @@ public class UserController {
 	}
 	
 	@PutMapping
+	@Cacheable(value = "updateUser")
 	public ResponseEntity<UserDTO> update(@Valid @RequestParam(name = "user_id") String id, @Valid @RequestBody UserDTO userDTO){
 		// Inserir pelo service no banco de dados
 		UserDTO updatedUser = userService.update(id, userDTO);
