@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import br.com.igor.registration.config.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +43,7 @@ public class UserController {
 	
 	
 	@GetMapping(value = ID)
-	@Cacheable(value = "findUserById")
+	@Cacheable(value = "userById")
 	public ResponseEntity<UserDTO> findById(@PathVariable Integer id){
 		UserDTO userDTO = userService.findById(id);
 
@@ -55,7 +57,8 @@ public class UserController {
 	}
 
 	@GetMapping (value = {"/", ""}) // aceitar com ou sem barra / a requisição
-	@Cacheable(value = "findAllUsers") // habilita cache no lado do servidor
+	@Cacheable(value = "allUsers") // habilita cache no lado do servidor
+	@CacheEvict(value = "allUsers", key = "#pageable") // CacheEvict invalida (atualiza) o cache para não entregar a versão desatualizada
 	public ResponseEntity<Page<UserDTO>> findAll(Pageable pageable){
 		// Buscar paginação no service
 		Page <UserDTO> page = userService.findAllPaged(pageable);
@@ -85,14 +88,15 @@ public class UserController {
 	}
 	
 	@PutMapping
-	@Cacheable(value = "updateUser")
+	@CachePut(value = "userById", key = "#id") // CachePut: atualiza cache
 	public ResponseEntity<UserDTO> update(@Valid @RequestParam(name = "user_id") String id, @Valid @RequestBody UserDTO userDTO){
 		// Inserir pelo service no banco de dados
 		UserDTO updatedUser = userService.update(id, userDTO);
 
 		return ResponseEntity.ok().body(updatedUser); // retornar o usuário atualizado
 	}
-	
+
+	@CacheEvict(value = "userById", key = "#id") // CacheEvict invalida (deleta) o cache para não entregar a versão desatualizada
 	@DeleteMapping (value = ID) // id no path da url
 	public ResponseEntity<Void> delete(@Valid @PathVariable Integer id, @RequestBody UserDTO userDTO){
 		userService.deleteById(id, userDTO);
