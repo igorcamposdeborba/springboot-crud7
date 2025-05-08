@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional(readOnly = true) // ReadOnly true não trava o banco (boa prática em operações de leitura). Transação sempre executa esta operação no banco de dados se for 100% de sucesso. 
-	@Cacheable(value = "userById")
+	@Cacheable(value = "userById", key = "'user_' + #id")
 	public UserDTO findById(Integer id) {
 		// Buscar no banco de dados
 		Optional<User> userDTO = userRespository.findById(id); 
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	@CachePut(value = "userById", key = "#userDTO.email")
+	@CachePut(value = "userById", key = "'user_' + #userDTO.email")
 	public UserDTO insert(UserDTO userDTO) {
 		// Exception para validar se já existe no banco de dados
 		validateDuplicatedEmail(userDTO.getEmail());
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	@CachePut(value = "userById", key = "#idInput") // CachePut: atualiza cache
+	@CachePut(value = "userById", key = "'user_' + #idInput") // CachePut: atualiza cache
 	public UserDTO update(String idInput, UserDTO userDTO) {
 		// Converter String para Integer id
 		Integer id = Integer.parseInt(idInput);
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "userById", key = "#id") // CacheEvict invalida (deleta) o cache para não entregar a versão desatualizada
+	@CacheEvict(value = "userById", key = "'user_' + #id") // CacheEvict invalida (deleta) o cache para não entregar a versão desatualizada
 	public void deleteById(Integer id, UserDTO userDTO) {
 		
 		// Validar com exception se id não for encontrado
