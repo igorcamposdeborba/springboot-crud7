@@ -1,12 +1,15 @@
 package br.com.igor.registration.entities.dto;
 
+import java.io.Serializable;
 import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import br.com.igor.registration.entities.User;
+import lombok.ToString;
 
-public class UserDTO {
+@ToString
+public class UserDTO implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
 	private String name;

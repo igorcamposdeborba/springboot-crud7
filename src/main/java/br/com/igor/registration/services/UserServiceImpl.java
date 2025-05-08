@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +33,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional(readOnly = true) // ReadOnly true não trava o banco (boa prática em operações de leitura). Transação sempre executa esta operação no banco de dados se for 100% de sucesso. 
+	@Cacheable(value = "userById")
 	public UserDTO findById(Integer id) {
 		// Buscar no banco de dados
 		Optional<User> userDTO = userRespository.findById(id); 
@@ -39,26 +43,29 @@ public class UserServiceImpl implements UserService {
 		
 		return new UserDTO(entity); // retornar somente dados permitidos (mapeados) pelo DTO
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true) // ReadOnly true não trava o banco (boa prática em operações de leitura)
+	@Cacheable(value = "allUsers") // habilita cache no lado do servidor
+	@CacheEvict(value = "allUsers", allEntries = true)
 	public Page<UserDTO> findAllPaged(Pageable pageable){
-		
-		// consultar banco de dados para User
+
+		// Consultar banco de dados para User
 		Page<User> list = userRespository.findAll(pageable);
-		
+
 		// Converter User em DTO
-		List<UserDTO> listDTO = list.stream().map((User user) -> new UserDTO(user)).collect(Collectors.toList());
-		
+		List<UserDTO> listDTO = list.stream().map(UserDTO::new).collect(Collectors.toList());
+
 		// Converter DTO em Page
-		Page<UserDTO> page = new PageImpl<UserDTO>(listDTO);
-		
-		// retornar paginado o Page
+		Page<UserDTO> page = new PageImpl<>(listDTO, pageable, list.getTotalElements());
+
+		// Retornar paginado o Page
 		return page;
 	}
 	
 	@Override
 	@Transactional
+	@Cacheable(value = "insertUser")
 	public UserDTO insert(UserDTO userDTO) {
 		// Exception para validar se já existe no banco de dados
 		validateDuplicatedEmail(userDTO.getEmail());
@@ -81,6 +88,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
+	@CachePut(value = "userById", key = "#idInput") // CachePut: atualiza cache
 	public UserDTO update(String idInput, UserDTO userDTO) {
 		// Converter String para Integer id
 		Integer id = Integer.parseInt(idInput);
@@ -104,6 +112,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Transactional
+	@CacheEvict(value = "userById", key = "#id") // CacheEvict invalida (deleta) o cache para não entregar a versão desatualizada
 	public void deleteById(Integer id, UserDTO userDTO) {
 		
 		// Validar com exception se id não for encontrado

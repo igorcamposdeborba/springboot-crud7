@@ -47,9 +47,22 @@
 		    <version>6.2.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.38</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<version>3.4.5</version>
+		</dependency>
 	</dependencies>
 
 	<build>
+		<finalName>registration</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
