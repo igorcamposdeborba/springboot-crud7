@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	@Cacheable(value = "insertUser")
+	@CachePut(value = "userById", key = "#userDTO.email")
 	public UserDTO insert(UserDTO userDTO) {
 		// Exception para validar se já existe no banco de dados
 		validateDuplicatedEmail(userDTO.getEmail());
