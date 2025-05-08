@@ -58,14 +58,6 @@ public class UserController {
 				                  .body(page);
 	}
 
-
-	private String generateDeepETag(UserDTO user){
-		String email = user.getEmail();
-		String password = user.getPassword();
-
-		return DigestUtils.md5DigestAsHex((email + password).getBytes());
-	}
-
 	@PostMapping
 	public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserDTO userDTO){
 		// Inserir pelo service no banco de dados
@@ -90,4 +82,11 @@ public class UserController {
 		
 		return ResponseEntity.noContent().cacheControl(CacheControl.noCache()).build(); // retornar status created 201 com uri do objeto criado
 	}	// no cache: para não armazenar o cache no front-end e fazer com que sempre consulte esse dado, mas ele armazena a informação de no-cache no lado do cliente (front end).
+
+	private String generateDeepETag(UserDTO user){
+		String email = user.getEmail();
+		String password = user.getPassword();
+
+		return DigestUtils.md5DigestAsHex((email + password).getBytes());
+	}
 }

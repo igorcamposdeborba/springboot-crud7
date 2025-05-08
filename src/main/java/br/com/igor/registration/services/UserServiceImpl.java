@@ -74,14 +74,8 @@ public class UserServiceImpl implements UserService {
 		User entity = new User(userDTO);
 		
 		// Criptografar senha
-		String encoded = passwordEncoder.encode(userDTO.getPassword()); // criptografar senha que será salva no banco. Decriptografia pela biblioteca BCrypt neste service
+		encriptPassword(userDTO, entity);
 
-		if (Objects.isNull(encoded)) { // gerar senha aleatória se não vier a senha. Usuário deverá usar serviço de recuperar senha
-			SecureRandom randomPassword = new SecureRandom();
-			encoded = randomPassword.generateSeed(1000).toString();
-		}
-		entity.setPassword(encoded);
-		
 		entity = userRespository.save(entity); // salvar no banco de dados
 		return new UserDTO(entity); // retornar o que foi salvo no banco de dados
 	}
@@ -104,13 +98,16 @@ public class UserServiceImpl implements UserService {
 		// Mapear DTO para classe
 		User entity = new User(userDTO);
 
+		// Criptografar senha
+		encriptPassword(userDTO, entity);
+
 		// Salvar no banco de dados
 		userRespository.save(entity);
 
 		// Retornar para a requisição o User atualizado
 		return new UserDTO(entity);
 	}
-	
+
 	@Transactional
 	@CacheEvict(value = "userById", key = "#id") // CacheEvict invalida (deleta) o cache para não entregar a versão desatualizada
 	public void deleteById(Integer id, UserDTO userDTO) {
@@ -143,5 +140,14 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		return user;
+	}
+
+	private void encriptPassword(UserDTO userDTO, User entity) {
+		String encoded = passwordEncoder.encode(userDTO.getPassword()); // criptografar senha que será salva no banco. Decriptografia pela biblioteca BCrypt neste service
+		if (Objects.isNull(encoded)) { // gerar senha aleatória se não vier a senha. Usuário deverá usar serviço de recuperar senha
+			SecureRandom randomPassword = new SecureRandom();
+			encoded = randomPassword.generateSeed(1000).toString();
+		}
+		entity.setPassword(encoded);
 	}
 }
