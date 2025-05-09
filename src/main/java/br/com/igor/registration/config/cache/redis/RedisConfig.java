@@ -18,11 +18,13 @@ public class RedisConfig {
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10)) // tempo de vida padrão do cache
+                .enableTimeToIdle() // reinicia tempo de vida a cada acesso do cache
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())); // Configura o serializador de chave
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .transactionAware() // permite rollback
                 .build();
     }
 }
